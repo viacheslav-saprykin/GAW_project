@@ -69,15 +69,13 @@ button:hover {
   color: #333;
 }
 
-/* Заголовок "Music Tracks Manager" */
 .tracks-page h1 {
-  text-align: left;  /* Заголовок по лівому краю */
+  text-align: left;
   color: #333;
 }
 
-/* Кнопка Create Track, щоб вона була праворуч */
 .create-track-button {
-  text-align: right;  /* Зміщуємо праворуч */
+  text-align: right;
   margin-bottom: 20px;
 }
 
@@ -101,19 +99,33 @@ ul {
 }
 
 .track-item {
-  margin-bottom: 15px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 15px;
   background-color: #fff;
   border-radius: 5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.track-info {
+  display: flex;
+  gap: 15px;
+  flex-grow: 1;
+}
+
+.track-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .track-buttons {
   display: flex;
+  flex-direction: column;
   gap: 10px;
+  align-items: flex-end;
 }
 
 .track-buttons button {

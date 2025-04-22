@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import './TracksPage.css';
 
 type Track = {
   id: string;
@@ -21,75 +22,119 @@ type TracksResponse = {
 
 const TracksPage: React.FC = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortField, setSortField] = useState('title');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [genresList, setGenresList] = useState<string[]>([]);
+  const [filterGenre, setFilterGenre] = useState('');
+  const [filterArtist, setFilterArtist] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    axios
+      .get<string[]>('http://localhost:8000/api/genres')
+      .then((res) => setGenresList(res.data))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const fetchTracks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get<TracksResponse>('http://localhost:8000/api/tracks', {
+        const res = await axios.get<TracksResponse>('http://localhost:8000/api/tracks', {
           params: {
             page: currentPage,
             limit: 10,
+            _sort: sortField,
+            _order: sortOrder,
+            search: debouncedSearch,
+            genre: filterGenre,
+            artist: filterArtist,
           },
         });
-
-        // Зберігаємо треки та інформацію про сторінки
-        if (Array.isArray(response.data.data)) {
-          setTracks(response.data.data);
-          setTotalPages(response.data.meta.totalPages);
-        } else {
-          console.error('Received data is not an array:', response.data);
-        }
-
-        console.log('Loaded tracks:', response.data);
-      } catch (error) {
-        console.error('Error fetching tracks:', error);
+        setTracks(res.data.data);
+        setTotalPages(res.data.meta.totalPages);
+      } catch (err) {
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTracks();
-  }, [currentPage]);
+  }, [currentPage, sortField, sortOrder, debouncedSearch, filterGenre, filterArtist]);
 
   const deleteTrack = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8000/api/tracks/${id}`);
       setTracks(tracks.filter((track) => track.id !== id));
-    } catch (error) {
-      console.error('Error deleting track:', error);
+    } catch (err) {
+      console.error('Error deleting track:', err);
     }
   };
 
   return (
     <div className="tracks-page">
-      <h1 data-testid="tracks-header">All Tracks</h1>
+      <h1>All Tracks</h1>
 
       <div className="create-track-button">
-        <Link to="/create" data-testid="create-track-button">
+        <Link to="/create">
           <button>Create Track</button>
         </Link>
       </div>
 
+      <div className="controls">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select value={sortField} onChange={(e) => setSortField(e.target.value)}>
+          <option value="title">Title</option>
+          <option value="artist">Artist</option>
+          <option value="album">Album</option>
+        </select>
+        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <option value="asc">Asc</option>
+          <option value="desc">Desc</option>
+        </select>
+        <select value={filterGenre} onChange={(e) => setFilterGenre(e.target.value)}>
+          <option value="">All Genres</option>
+          {genresList.map((genre) => (
+            <option key={genre} value={genre}>{genre}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="Filter by artist"
+          value={filterArtist}
+          onChange={(e) => setFilterArtist(e.target.value)}
+        />
+      </div>
+
       {loading ? (
-        <div data-testid="loading-tracks">Loading tracks...</div>
+        <p>Loading tracks...</p>
       ) : (
         <>
-          <ul>
-            {Array.isArray(tracks) && tracks.map((track) => (
-              <li
-                key={track.id}
-                data-testid={`track-item-${track.id}`}
-                className="track-item"
-              >
+          <ul className="track-list">
+            {tracks.map((track) => (
+              <li key={track.id} className="track-item">
                 <div className="track-info">
                   {track.coverImage && (
-                    <img src={track.coverImage} alt={track.title} width={100} height={100} />
+                    <img src={track.coverImage} alt={track.title} className="cover-image" />
                   )}
-                  <div className="track-details">
+                  <div>
                     <h3>{track.title}</h3>
                     <p>Artist: {track.artist}</p>
                     {track.album && <p>Album: {track.album}</p>}
@@ -106,21 +151,12 @@ const TracksPage: React.FC = () => {
             ))}
           </ul>
 
-          {/* Пагінація */}
-          <div data-testid="pagination" className="pagination">
-            <button
-              data-testid="pagination-prev"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(currentPage - 1)}
-            >
+          <div className="pagination">
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
               Previous
             </button>
             <span>Page {currentPage} of {totalPages}</span>
-            <button
-              data-testid="pagination-next"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(currentPage + 1)}
-            >
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
               Next
             </button>
           </div>
