@@ -1,0 +1,13 @@
+{
+  "title": "test 1",
+  "artist": "test 2",
+  "album": "test ",
+  "genres": [
+    "Pop"
+  ],
+  "coverImage": "https://www.shutterstock.com/shutterstock/photos/763713406/display_1500/stock-vector-sun-flat-vector-icon-isolated-on-white-background-763713406.jpg",
+  "slug": "test-1",
+  "id": "1745335921927",
+  "createdAt": "2025-04-22T15:32:01.927Z",
+  "updatedAt": "2025-04-22T15:32:01.927Z"
+}

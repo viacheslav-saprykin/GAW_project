@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 type Track = {
-  id: string; // Використовуємо string, як у відповіді API
+  id: string;
   title: string;
   artist: string;
   album?: string;
@@ -11,23 +11,39 @@ type Track = {
   genres?: string[];
 };
 
+type TracksResponse = {
+  data: Track[];
+  meta: {
+    currentPage: number;
+    totalPages: number;
+  };
+};
+
 const TracksPage: React.FC = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     const fetchTracks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:8000/api/tracks');
-        
-        // Тепер звертаємось до поля `data` для отримання масиву треків
+        const response = await axios.get<TracksResponse>('http://localhost:8000/api/tracks', {
+          params: {
+            page: currentPage,
+            limit: 10,
+          },
+        });
+
+        // Зберігаємо треки та інформацію про сторінки
         if (Array.isArray(response.data.data)) {
-          setTracks(response.data.data); // Відповідно зберігаємо дані з поля `data`
+          setTracks(response.data.data);
+          setTotalPages(response.data.meta.totalPages);
         } else {
           console.error('Received data is not an array:', response.data);
         }
-        
+
         console.log('Loaded tracks:', response.data);
       } catch (error) {
         console.error('Error fetching tracks:', error);
@@ -37,7 +53,7 @@ const TracksPage: React.FC = () => {
     };
 
     fetchTracks();
-  }, []);
+  }, [currentPage]);
 
   const deleteTrack = async (id: string) => {
     try {
@@ -90,9 +106,23 @@ const TracksPage: React.FC = () => {
             ))}
           </ul>
 
+          {/* Пагінація */}
           <div data-testid="pagination" className="pagination">
-            <button data-testid="pagination-prev">Previous</button>
-            <button data-testid="pagination-next">Next</button>
+            <button
+              data-testid="pagination-prev"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              Previous
+            </button>
+            <span>Page {currentPage} of {totalPages}</span>
+            <button
+              data-testid="pagination-next"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              Next
+            </button>
           </div>
         </>
       )}
