@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Інстанс для API
 const api = axios.create({
-  baseURL: 'http://localhost:3000', // Адреса серверу
+  baseURL: 'http://localhost:8000', // Адреса серверу
 });
 
 // Отримання жанрів

@@ -19,7 +19,7 @@ const TracksPage: React.FC = () => {
     const fetchTracks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:3000/api/tracks');
+        const response = await axios.get('http://localhost:8000/api/tracks');
         setTracks(response.data.data);
         console.log('Loaded tracks:', response.data);
       } catch (error) {
@@ -34,7 +34,7 @@ const TracksPage: React.FC = () => {
 
   const deleteTrack = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:3000/api/tracks/${id}`);
+      await axios.delete(`http://localhost:8000/api/tracks/${id}`);
       setTracks(tracks.filter((track) => track.id !== id));
     } catch (error) {
       console.error('Error deleting track:', error);

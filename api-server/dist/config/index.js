@@ -25,7 +25,7 @@ dotenv_expand_1.default.expand(env);
  */
 const envSchema = zod_1.z.object({
     // Server settings
-    PORT: zod_1.z.string().default('3000').transform(Number),
+    PORT: zod_1.z.string().default('8000').transform(Number),
     HOST: zod_1.z.string().default('0.0.0.0'),
     NODE_ENV: zod_1.z.enum(['development', 'production', 'test']).default('development'),
     // File storage settings

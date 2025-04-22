@@ -20,7 +20,7 @@ const CreateTrackForm = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:3000/api/tracks", {
+      const response = await axios.post("http://localhost:8000/api/tracks", {
         title,
         artist,
         album,

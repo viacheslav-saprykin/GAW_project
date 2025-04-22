@@ -26,7 +26,7 @@ const EditTrackPage: React.FC = () => {
     const fetchTrack = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:3000/api/tracks/${id}`);
+        const response = await axios.get(`http://localhost:8000/api/tracks/${id}`);
         if (response.data) {
           setTrack(response.data); // якщо трек знайдений, встановлюємо його в стан
         } else {
@@ -49,7 +49,7 @@ const EditTrackPage: React.FC = () => {
 
     if (track) {
       try {
-        await axios.put(`http://localhost:3000/api/tracks/${track.id}`, track);
+        await axios.put(`http://localhost:8000/api/tracks/${track.id}`, track);
         setSuccess("Track updated successfully!");
         setTimeout(() => {
           navigate("/tracks"); // Перенаправлення на сторінку зі списком треків після успішного редагування
