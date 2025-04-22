@@ -32,6 +32,9 @@ const TracksPage: React.FC = () => {
   const [genresList, setGenresList] = useState<string[]>([]);
   const [filterGenre, setFilterGenre] = useState('');
   const [filterArtist, setFilterArtist] = useState('');
+  
+  // Стейт для вибору треків
+  const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -74,12 +77,33 @@ const TracksPage: React.FC = () => {
     fetchTracks();
   }, [currentPage, sortField, sortOrder, debouncedSearch, filterGenre, filterArtist]);
 
+  const toggleSelectTrack = (id: string) => {
+    const newSelectedTracks = new Set(selectedTracks);
+    if (newSelectedTracks.has(id)) {
+      newSelectedTracks.delete(id);
+    } else {
+      newSelectedTracks.add(id);
+    }
+    setSelectedTracks(newSelectedTracks);
+  };
+
   const deleteTrack = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8000/api/tracks/${id}`);
       setTracks(tracks.filter((track) => track.id !== id));
     } catch (err) {
       console.error('Error deleting track:', err);
+    }
+  };
+
+  const deleteSelectedTracks = async () => {
+    try {
+      const trackIds = Array.from(selectedTracks);
+      await axios.post('http://localhost:8000/api/tracks/delete', { ids: trackIds });
+      setTracks(tracks.filter((track) => !selectedTracks.has(track.id)));
+      setSelectedTracks(new Set()); // очищаємо вибір
+    } catch (err) {
+      console.error('Error deleting selected tracks:', err);
     }
   };
 
@@ -127,6 +151,15 @@ const TracksPage: React.FC = () => {
         <p>Loading tracks...</p>
       ) : (
         <>
+          <div className="bulk-delete">
+            <button
+              onClick={deleteSelectedTracks}
+              disabled={selectedTracks.size === 0}
+            >
+              Delete Selected
+            </button>
+          </div>
+
           <ul className="track-list">
             {tracks.map((track) => (
               <li key={track.id} className="track-item">
@@ -142,6 +175,12 @@ const TracksPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="track-buttons">
+                  <input
+                    type="checkbox"
+                    checked={selectedTracks.has(track.id)}
+                    onChange={() => toggleSelectTrack(track.id)}
+                    data-testid={`track-checkbox-${track.id}`}
+                  />
                   <Link to={`/edit/${track.id}`}>
                     <button>Edit</button>
                   </Link>

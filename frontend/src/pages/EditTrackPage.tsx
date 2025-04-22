@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 type Track = {
-  id: number;
+  id: string;
   title: string;
   artist: string;
   album?: string;
@@ -22,11 +22,13 @@ const EditTrackPage: React.FC = () => {
   // Завантаження треку для редагування
   useEffect(() => {
     if (!id) return; // Додаємо перевірку на існування id
-    console.log(`Fetching track with ID: ${id}`);
+    console.log(`Fetching track with ID: ${id}`); // Лог для перевірки ID
+
     const fetchTrack = async () => {
       setLoading(true);
       try {
         const response = await axios.get(`http://localhost:8000/api/tracks/${id}`);
+        console.log("Fetched track:", response.data); // Лог даних треку
         if (response.data) {
           setTrack(response.data); // якщо трек знайдений, встановлюємо його в стан
         } else {
