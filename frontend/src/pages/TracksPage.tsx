@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 type Track = {
-  id: number;
+  id: string; // Використовуємо string, як у відповіді API
   title: string;
   artist: string;
   album?: string;
@@ -20,7 +20,14 @@ const TracksPage: React.FC = () => {
       setLoading(true);
       try {
         const response = await axios.get('http://localhost:8000/api/tracks');
-        setTracks(response.data.data);
+        
+        // Тепер звертаємось до поля `data` для отримання масиву треків
+        if (Array.isArray(response.data.data)) {
+          setTracks(response.data.data); // Відповідно зберігаємо дані з поля `data`
+        } else {
+          console.error('Received data is not an array:', response.data);
+        }
+        
         console.log('Loaded tracks:', response.data);
       } catch (error) {
         console.error('Error fetching tracks:', error);
@@ -32,7 +39,7 @@ const TracksPage: React.FC = () => {
     fetchTracks();
   }, []);
 
-  const deleteTrack = async (id: number) => {
+  const deleteTrack = async (id: string) => {
     try {
       await axios.delete(`http://localhost:8000/api/tracks/${id}`);
       setTracks(tracks.filter((track) => track.id !== id));
@@ -56,15 +63,24 @@ const TracksPage: React.FC = () => {
       ) : (
         <>
           <ul>
-            {tracks.map((track) => (
+            {Array.isArray(tracks) && tracks.map((track) => (
               <li
                 key={track.id}
                 data-testid={`track-item-${track.id}`}
                 className="track-item"
               >
-                <span>{track.title}</span> – <span>{track.artist}</span>
+                <div className="track-info">
+                  {track.coverImage && (
+                    <img src={track.coverImage} alt={track.title} width={100} height={100} />
+                  )}
+                  <div className="track-details">
+                    <h3>{track.title}</h3>
+                    <p>Artist: {track.artist}</p>
+                    {track.album && <p>Album: {track.album}</p>}
+                    {track.genres && <p>Genres: {track.genres.join(', ')}</p>}
+                  </div>
+                </div>
                 <div className="track-buttons">
-                  {/* Додано посилання для редагування */}
                   <Link to={`/edit/${track.id}`}>
                     <button>Edit</button>
                   </Link>
