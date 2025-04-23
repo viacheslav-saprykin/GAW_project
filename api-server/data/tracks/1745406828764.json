@@ -1,0 +1,13 @@
+{
+  "title": "TEst 2",
+  "artist": "TEst 2",
+  "album": "TEst 2",
+  "genres": [
+    "Pop"
+  ],
+  "coverImage": "",
+  "slug": "test-2",
+  "id": "1745406828764",
+  "createdAt": "2025-04-23T11:13:48.764Z",
+  "updatedAt": "2025-04-23T11:13:48.764Z"
+}

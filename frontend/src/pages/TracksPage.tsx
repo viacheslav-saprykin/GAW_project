@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import './TracksPage.css';
+import CreateTrackForm from '../components/CreateTrackForm';
+import Modal from '../components/Modal';
 
 type Track = {
   id: string;
@@ -15,7 +16,6 @@ type Track = {
 type TracksResponse = {
   data: Track[];
   meta: {
-    currentPage: number;
     totalPages: number;
   };
 };
@@ -32,10 +32,10 @@ const TracksPage: React.FC = () => {
   const [genresList, setGenresList] = useState<string[]>([]);
   const [filterGenre, setFilterGenre] = useState('');
   const [filterArtist, setFilterArtist] = useState('');
-  
-  // Стейт для вибору треків
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
+  // Дебаунс для пошуку
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
@@ -43,18 +43,12 @@ const TracksPage: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  useEffect(() => {
-    axios
-      .get<string[]>('http://localhost:8000/api/genres')
-      .then((res) => setGenresList(res.data))
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    const fetchTracks = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get<TracksResponse>('http://localhost:8000/api/tracks', {
+  const fetchTracks = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get<TracksResponse>(
+        'http://localhost:8000/api/tracks',
+        {
           params: {
             page: currentPage,
             limit: 10,
@@ -64,18 +58,40 @@ const TracksPage: React.FC = () => {
             genre: filterGenre,
             artist: filterArtist,
           },
-        });
-        setTracks(res.data.data);
-        setTotalPages(res.data.meta.totalPages);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+        }
+      );
+      setTracks(res.data.data);
+      setTotalPages(res.data.meta.totalPages);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    currentPage,
+    sortField,
+    sortOrder,
+    debouncedSearch,
+    filterGenre,
+    filterArtist,
+  ]);
 
+  const fetchGenres = useCallback(async () => {
+    try {
+      const res = await axios.get<string[]>('http://localhost:8000/api/genres');
+      setGenresList(res.data);
+    } catch (err) {
+      console.error('Error fetching genres:', err);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchTracks();
-  }, [currentPage, sortField, sortOrder, debouncedSearch, filterGenre, filterArtist]);
+  }, [fetchTracks]);
+
+  useEffect(() => {
+    fetchGenres();
+  }, [fetchGenres]);
 
   const toggleSelectTrack = (id: string) => {
     const newSelectedTracks = new Set(selectedTracks);
@@ -99,12 +115,19 @@ const TracksPage: React.FC = () => {
   const deleteSelectedTracks = async () => {
     try {
       const trackIds = Array.from(selectedTracks);
-      await axios.post('http://localhost:8000/api/tracks/delete', { ids: trackIds });
+      await axios.post('http://localhost:8000/api/tracks/delete', {
+        ids: trackIds,
+      });
       setTracks(tracks.filter((track) => !selectedTracks.has(track.id)));
-      setSelectedTracks(new Set()); // очищаємо вибір
+      setSelectedTracks(new Set());
     } catch (err) {
       console.error('Error deleting selected tracks:', err);
     }
+  };
+
+  const handleCreateSuccess = (newTrack: Track) => {
+    setShowCreateModal(false);
+    setTracks([newTrack, ...tracks]);
   };
 
   return (
@@ -112,33 +135,45 @@ const TracksPage: React.FC = () => {
       <h1>All Tracks</h1>
 
       <div className="create-track-button">
-        <Link to="/create">
-          <button>Create Track</button>
-        </Link>
+        <button onClick={() => setShowCreateModal(true)}>Create Track</button>
       </div>
 
       <div className="controls">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search by title or artist"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select value={sortField} onChange={(e) => setSortField(e.target.value)}>
+
+        <select
+          value={sortField}
+          onChange={(e) => setSortField(e.target.value)}
+        >
           <option value="title">Title</option>
           <option value="artist">Artist</option>
-          <option value="album">Album</option>
         </select>
-        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+        >
           <option value="asc">Asc</option>
           <option value="desc">Desc</option>
         </select>
-        <select value={filterGenre} onChange={(e) => setFilterGenre(e.target.value)}>
+
+        <select
+          value={filterGenre}
+          onChange={(e) => setFilterGenre(e.target.value)}
+        >
           <option value="">All Genres</option>
           {genresList.map((genre) => (
-            <option key={genre} value={genre}>{genre}</option>
+            <option key={genre} value={genre}>
+              {genre}
+            </option>
           ))}
         </select>
+
         <input
           type="text"
           placeholder="Filter by artist"
@@ -165,7 +200,11 @@ const TracksPage: React.FC = () => {
               <li key={track.id} className="track-item">
                 <div className="track-info">
                   {track.coverImage && (
-                    <img src={track.coverImage} alt={track.title} className="cover-image" />
+                    <img
+                      src={track.coverImage}
+                      alt={track.title}
+                      className="cover-image"
+                    />
                   )}
                   <div>
                     <h3>{track.title}</h3>
@@ -179,11 +218,10 @@ const TracksPage: React.FC = () => {
                     type="checkbox"
                     checked={selectedTracks.has(track.id)}
                     onChange={() => toggleSelectTrack(track.id)}
-                    data-testid={`track-checkbox-${track.id}`}
                   />
-                  <Link to={`/edit/${track.id}`}>
-                    <button>Edit</button>
-                  </Link>
+                  <button onClick={() => alert('Edit modal coming soon!')}>
+                    Edit
+                  </button>
                   <button onClick={() => deleteTrack(track.id)}>Delete</button>
                 </div>
               </li>
@@ -191,15 +229,33 @@ const TracksPage: React.FC = () => {
           </ul>
 
           <div className="pagination">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
               Previous
             </button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
               Next
             </button>
           </div>
         </>
+      )}
+
+      {showCreateModal && (
+        <Modal onClose={() => setShowCreateModal(false)}>
+          <CreateTrackForm
+            onSuccess={handleCreateSuccess}
+            genresList={genresList}
+            onClose={() => setShowCreateModal(false)}
+          />
+        </Modal>
       )}
     </div>
   );
