@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Track } from '../types';
+import { isValidImageUrl } from '../utils/imageValidation';
 
 type CreateTrackFormProps = {
   onSuccess: (newTrack: Track) => void;
@@ -38,22 +39,29 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Якщо є URL, перевіряємо його валідність
+    if (coverImageUrl && !isValidImageUrl(coverImageUrl)) {
+      setNotification({
+        message: 'Invalid image URL. Please provide a valid image URL.',
+        type: 'error',
+      });
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:8000/api/tracks', {
         title,
         artist,
         album,
-        coverImage: coverImageUrl,
+        coverImage: coverImageUrl || null, // Якщо немає URL — передаємо null
         genres,
       });
 
-      // Покажемо сповіщення
       setNotification({
         message: `Track "${response.data.title}" created successfully!`,
         type: 'success',
       });
 
-      // Очистка форми
       setTitle('');
       setArtist('');
       setAlbum('');
@@ -61,13 +69,13 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
       setGenres([]);
 
       onSuccess(response.data);
-      onClose(); // Закриваємо модалку
+      onClose();
     } catch (error) {
       console.error('Error creating track:', error);
       setNotification({
         message: 'Error creating track. Please try again.',
         type: 'error',
-      }); // Сповіщення про помилку
+      });
     }
   };
 
@@ -103,7 +111,8 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
             <div
               style={{
                 ...notificationStyle,
-                backgroundColor: notification.type === 'error' ? '#f44336' : '#4CAF50', // Червоний для помилки, зелений для успіху
+                backgroundColor:
+                  notification.type === 'error' ? '#f44336' : '#4CAF50', // Червоний для помилки, зелений для успіху
               }}
             >
               {notification.message}
@@ -148,6 +157,11 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
             />
           </div>
 
+          {/* Перевірка валідності URL */}
+          {coverImageUrl && !isValidImageUrl(coverImageUrl) && (
+            <p style={{ color: 'red' }}>The provided URL is not a valid image URL.</p>
+          )}
+
           <div style={fieldStyle}>
             <label>Genres:</label>
             <div style={tagContainerStyle}>
@@ -178,7 +192,9 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
                   value=""
                   style={addTagStyle}
                 >
-                  <option value="" disabled>Select a genre</option>
+                  <option value="" disabled>
+                    Select a genre
+                  </option>
                   {genresList.map((genre) => (
                     <option key={genre} value={genre}>
                       {genre}

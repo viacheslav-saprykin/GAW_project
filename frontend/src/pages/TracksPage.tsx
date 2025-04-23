@@ -3,6 +3,7 @@ import axios from 'axios';
 import './TracksPage.css';
 import CreateTrackForm from '../components/CreateTrackForm';
 import Modal from '../components/Modal';
+import { isValidImageUrl } from '../utils/imageValidation';
 
 type Track = {
   id: string;
@@ -199,13 +200,26 @@ const TracksPage: React.FC = () => {
             {tracks.map((track) => (
               <li key={track.id} className="track-item">
                 <div className="track-info">
-                  {track.coverImage && (
+                  {track.coverImage && isValidImageUrl(track.coverImage) ? (
                     <img
                       src={track.coverImage}
                       alt={track.title}
-                      className="cover-image"
+                      style={{
+                        width: '100px',
+                        height: '100px',
+                        objectFit: 'cover',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src="/gray-placeholder.png"
+                      alt="Placeholder"
+                      className="track-cover"
                     />
                   )}
+
                   <div>
                     <h3>{track.title}</h3>
                     <p>Artist: {track.artist}</p>

@@ -148,3 +148,10 @@
   color: #666;
   cursor: not-allowed;
 }
+.track-cover {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
