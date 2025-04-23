@@ -23,12 +23,14 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
     type: 'success' | 'error';
   } | null>(null); // Тепер сповіщення з типом
 
-  const handleGenreChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedGenres = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-    setGenres(selectedGenres);
+  const handleGenreAdd = (genre: string) => {
+    if (!genres.includes(genre)) {
+      setGenres((prevGenres) => [...prevGenres, genre]);
+    }
+  };
+
+  const handleGenreRemove = (genre: string) => {
+    setGenres((prevGenres) => prevGenres.filter((g) => g !== genre));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,13 +148,33 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
 
           <div style={fieldStyle}>
             <label>Genres:</label>
-            <select multiple value={genres} onChange={handleGenreChange}>
-              {genresList.map((genre) => (
-                <option key={genre} value={genre}>
+            <div style={tagContainerStyle}>
+              {/* Виведення вибраних жанрів як тегів */}
+              {genres.map((genre) => (
+                <div key={genre} style={tagStyle}>
                   {genre}
-                </option>
+                  <span
+                    onClick={() => handleGenreRemove(genre)}
+                    style={removeTagStyle}
+                  >
+                    x
+                  </span>
+                </div>
               ))}
-            </select>
+              {/* Додавання жанрів */}
+              <select
+                onChange={(e) => handleGenreAdd(e.target.value)}
+                value=""
+                style={addTagStyle}
+              >
+                <option value="" disabled>Select a genre</option>
+                {genresList.map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div style={buttonGroupStyle}>
@@ -226,6 +248,35 @@ const notificationStyle: React.CSSProperties = {
   color: 'white',
   borderRadius: '5px',
   zIndex: 1001,
+};
+
+// Стилі для тегів жанрів
+const tagContainerStyle: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '10px',
+};
+
+const tagStyle: React.CSSProperties = {
+  backgroundColor: '#4CAF50',
+  color: 'white',
+  padding: '5px 10px',
+  borderRadius: '20px',
+  display: 'flex',
+  alignItems: 'center',
+};
+
+const removeTagStyle: React.CSSProperties = {
+  marginLeft: '8px',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+  fontSize: '16px',
+};
+
+const addTagStyle: React.CSSProperties = {
+  marginTop: '10px',
+  padding: '5px',
+  borderRadius: '4px',
 };
 
 export default CreateTrackForm;
