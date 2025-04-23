@@ -1,0 +1,13 @@
+{
+  "title": "test 11",
+  "artist": "test 11",
+  "album": "test 11",
+  "genres": [
+    "Metal"
+  ],
+  "coverImage": "",
+  "slug": "test-11",
+  "id": "1745408016324",
+  "createdAt": "2025-04-23T11:33:36.324Z",
+  "updatedAt": "2025-04-23T11:33:36.324Z"
+}

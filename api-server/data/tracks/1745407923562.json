@@ -1,0 +1,13 @@
+{
+  "title": "test 9",
+  "artist": "test 9",
+  "album": "test 9",
+  "genres": [
+    "Hip Hop"
+  ],
+  "coverImage": "",
+  "slug": "test-9",
+  "id": "1745407923562",
+  "createdAt": "2025-04-23T11:32:03.562Z",
+  "updatedAt": "2025-04-23T11:32:03.562Z"
+}

@@ -1,0 +1,13 @@
+{
+  "title": "test 13",
+  "artist": "test 13",
+  "album": "test 13",
+  "genres": [
+    "Indie"
+  ],
+  "coverImage": "https://media.istockphoto.com/id/1216537865/uk/%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D1%96-%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%BD%D1%8F/%D0%BB%D0%B5%D0%B2%D0%B8-%D1%82%D1%80%D0%B8%D0%BC%D0%B0%D1%8E%D1%82%D1%8C-%D1%89%D0%B8%D1%82.jpg?s=1024x1024&w=is&k=20&c=qS9jjFr4tfeP-NGvafYPDCrtkZPftaqKPLbPf09NoVQ=",
+  "slug": "test-13",
+  "id": "1745408164315",
+  "createdAt": "2025-04-23T11:36:04.315Z",
+  "updatedAt": "2025-04-23T11:36:04.315Z"
+}

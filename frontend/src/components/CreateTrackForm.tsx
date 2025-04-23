@@ -18,7 +18,10 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
   const [album, setAlbum] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [genres, setGenres] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null); // Тепер сповіщення з типом
 
   const handleGenreChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedGenres = Array.from(
@@ -30,7 +33,6 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     try {
       const response = await axios.post('http://localhost:8000/api/tracks', {
@@ -41,7 +43,11 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
         genres,
       });
 
-      alert('Track created successfully: ' + response.data.title);
+      // Покажемо сповіщення
+      setNotification({
+        message: `Track "${response.data.title}" created successfully!`,
+        type: 'success',
+      });
 
       // Очистка форми
       setTitle('');
@@ -54,9 +60,23 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
       onClose(); // Закриваємо модалку
     } catch (error) {
       console.error('Error creating track:', error);
-      setError('Error creating track. Please try again.');
+      setNotification({
+        message: 'Error creating track. Please try again.',
+        type: 'error',
+      }); // Сповіщення про помилку
     }
   };
+
+  // Логіка для автоматичного приховування сповіщення
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000); // Сповіщення зникає через 3 секунди
+
+      return () => clearTimeout(timer); // Очищаємо таймер при скасуванні
+    }
+  }, [notification]);
 
   useEffect(() => {
     // Заборона прокручування сторінки при відкритій модалці
@@ -74,7 +94,17 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
         <form onSubmit={handleSubmit} style={formStyle}>
           <h2>Create New Track</h2>
 
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {/* Сповіщення */}
+          {notification && (
+            <div
+              style={{
+                ...notificationStyle,
+                backgroundColor: notification.type === 'error' ? '#f44336' : '#4CAF50', // Червоний для помилки, зелений для успіху
+              }}
+            >
+              {notification.message}
+            </div>
+          )}
 
           <div style={fieldStyle}>
             <label>Title:</label>
@@ -186,5 +216,16 @@ const cancelButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
+// Стиль для сповіщення
+const notificationStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '20px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  padding: '10px 20px',
+  color: 'white',
+  borderRadius: '5px',
+  zIndex: 1001,
+};
 
 export default CreateTrackForm;

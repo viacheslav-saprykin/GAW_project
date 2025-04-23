@@ -1,0 +1,13 @@
+{
+  "title": "Test 12",
+  "artist": "Test 12",
+  "album": "Test 12",
+  "genres": [
+    "Blues"
+  ],
+  "coverImage": "https://media.istockphoto.com/id/137032413/uk/%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D1%96-%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%BD%D1%8F/%D0%B3%D0%B5%D1%80%D0%B1-%D0%BB%D0%B5%D0%B2%D0%B0.jpg?s=1024x1024&w=is&k=20&c=80mrpCl-etGEeuSW8FiH8113XXc94xfmSx_Zw_WXrvM=",
+  "slug": "test-12",
+  "id": "1745408141570",
+  "createdAt": "2025-04-23T11:35:41.570Z",
+  "updatedAt": "2025-04-23T11:35:41.570Z"
+}
