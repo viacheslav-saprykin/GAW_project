@@ -21,14 +21,14 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
-  } | null>(null);
-  const [isAddingGenre, setIsAddingGenre] = useState(false); // Контроль стану для відкриття селекту
+  } | null>(null); // Тепер сповіщення з типом
+  const [isAddingGenre, setIsAddingGenre] = useState(false); // Для контролю відкриття селекту
 
   const handleGenreAdd = (genre: string) => {
     if (!genres.includes(genre)) {
       setGenres((prevGenres) => [...prevGenres, genre]);
     }
-    setIsAddingGenre(false); // Закрити селект після додавання жанру
+    setIsAddingGenre(false); // Закриваємо селект після додавання жанру
   };
 
   const handleGenreRemove = (genre: string) => {
@@ -67,7 +67,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
       setNotification({
         message: 'Error creating track. Please try again.',
         type: 'error',
-      });
+      }); // Сповіщення про помилку
     }
   };
 
@@ -78,7 +78,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
         setNotification(null);
       }, 3000); // Сповіщення зникає через 3 секунди
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer); // Очищаємо таймер при скасуванні
     }
   }, [notification]);
 
@@ -103,7 +103,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
             <div
               style={{
                 ...notificationStyle,
-                backgroundColor: notification.type === 'error' ? '#f44336' : '#4CAF50',
+                backgroundColor: notification.type === 'error' ? '#f44336' : '#4CAF50', // Червоний для помилки, зелений для успіху
               }}
             >
               {notification.message}
@@ -163,7 +163,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
                   </span>
                 </div>
               ))}
-              {/* Кнопка для додавання нового жанру або селект */}
+              {/* Кнопка для додавання нового жанру */}
               {!isAddingGenre ? (
                 <button
                   type="button"
@@ -208,7 +208,7 @@ const modalBackdropStyle: React.CSSProperties = {
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)', // Напівпрозорий фон
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -250,6 +250,7 @@ const cancelButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
+// Стиль для сповіщення
 const notificationStyle: React.CSSProperties = {
   position: 'absolute',
   top: '20px',
@@ -261,6 +262,7 @@ const notificationStyle: React.CSSProperties = {
   zIndex: 1001,
 };
 
+// Стилі для тегів жанрів
 const tagContainerStyle: React.CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
@@ -270,10 +272,11 @@ const tagContainerStyle: React.CSSProperties = {
 const tagStyle: React.CSSProperties = {
   backgroundColor: '#4CAF50',
   color: 'white',
-  padding: '5px 10px',
+  padding: '10px 17px', // Збільшуємо padding для більших тегів
   borderRadius: '20px',
   display: 'flex',
   alignItems: 'center',
+  fontSize: '16px', // Можна також збільшити розмір шрифту
 };
 
 const removeTagStyle: React.CSSProperties = {
@@ -294,8 +297,8 @@ const addButtonStyle: React.CSSProperties = {
   color: 'white',
   border: 'none',
   borderRadius: '50%',
-  width: '30px',
-  height: '30px',
+  width: '35px',
+  height: '35px',
   fontSize: '20px',
   cursor: 'pointer',
   display: 'flex',
