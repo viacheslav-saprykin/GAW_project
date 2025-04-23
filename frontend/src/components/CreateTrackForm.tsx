@@ -21,12 +21,14 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
-  } | null>(null); // Тепер сповіщення з типом
+  } | null>(null);
+  const [isAddingGenre, setIsAddingGenre] = useState(false); // Контроль стану для відкриття селекту
 
   const handleGenreAdd = (genre: string) => {
     if (!genres.includes(genre)) {
       setGenres((prevGenres) => [...prevGenres, genre]);
     }
+    setIsAddingGenre(false); // Закрити селект після додавання жанру
   };
 
   const handleGenreRemove = (genre: string) => {
@@ -65,7 +67,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
       setNotification({
         message: 'Error creating track. Please try again.',
         type: 'error',
-      }); // Сповіщення про помилку
+      });
     }
   };
 
@@ -76,7 +78,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
         setNotification(null);
       }, 3000); // Сповіщення зникає через 3 секунди
 
-      return () => clearTimeout(timer); // Очищаємо таймер при скасуванні
+      return () => clearTimeout(timer);
     }
   }, [notification]);
 
@@ -101,7 +103,7 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
             <div
               style={{
                 ...notificationStyle,
-                backgroundColor: notification.type === 'error' ? '#f44336' : '#4CAF50', // Червоний для помилки, зелений для успіху
+                backgroundColor: notification.type === 'error' ? '#f44336' : '#4CAF50',
               }}
             >
               {notification.message}
@@ -161,19 +163,29 @@ const CreateTrackForm: React.FC<CreateTrackFormProps> = ({
                   </span>
                 </div>
               ))}
-              {/* Додавання жанрів */}
-              <select
-                onChange={(e) => handleGenreAdd(e.target.value)}
-                value=""
-                style={addTagStyle}
-              >
-                <option value="" disabled>Select a genre</option>
-                {genresList.map((genre) => (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                ))}
-              </select>
+              {/* Кнопка для додавання нового жанру або селект */}
+              {!isAddingGenre ? (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingGenre(true)}
+                  style={addButtonStyle}
+                >
+                  +
+                </button>
+              ) : (
+                <select
+                  onChange={(e) => handleGenreAdd(e.target.value)}
+                  value=""
+                  style={addTagStyle}
+                >
+                  <option value="" disabled>Select a genre</option>
+                  {genresList.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 
@@ -196,7 +208,7 @@ const modalBackdropStyle: React.CSSProperties = {
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)', // Напівпрозорий фон
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -238,7 +250,6 @@ const cancelButtonStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-// Стиль для сповіщення
 const notificationStyle: React.CSSProperties = {
   position: 'absolute',
   top: '20px',
@@ -250,7 +261,6 @@ const notificationStyle: React.CSSProperties = {
   zIndex: 1001,
 };
 
-// Стилі для тегів жанрів
 const tagContainerStyle: React.CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
@@ -277,6 +287,20 @@ const addTagStyle: React.CSSProperties = {
   marginTop: '10px',
   padding: '5px',
   borderRadius: '4px',
+};
+
+const addButtonStyle: React.CSSProperties = {
+  backgroundColor: '#4CAF50',
+  color: 'white',
+  border: 'none',
+  borderRadius: '50%',
+  width: '30px',
+  height: '30px',
+  fontSize: '20px',
+  cursor: 'pointer',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
 };
 
 export default CreateTrackForm;
