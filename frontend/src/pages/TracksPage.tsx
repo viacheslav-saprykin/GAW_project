@@ -4,14 +4,16 @@ import './TracksPage.css';
 import CreateTrackForm from '../components/CreateTrackForm';
 import Modal from '../components/Modal';
 import { isValidImageUrl } from '../utils/imageValidation';
+import UploadAudioForm from '../components/UploadAudioForm';
 
-type Track = {
+export type Track = {
   id: string;
   title: string;
   artist: string;
   album?: string;
   coverImage?: string;
   genres?: string[];
+  audioFile?: string;
 };
 
 type TracksResponse = {
@@ -35,6 +37,7 @@ const TracksPage: React.FC = () => {
   const [filterArtist, setFilterArtist] = useState('');
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [uploadTrackId, setUploadTrackId] = useState<string | null>(null);
 
   // Дебаунс для пошуку
   useEffect(() => {
@@ -128,7 +131,7 @@ const TracksPage: React.FC = () => {
 
   const handleCreateSuccess = (newTrack: Track) => {
     setShowCreateModal(false);
-    setTracks([newTrack, ...tracks]);
+    setTracks((prevTracks) => [newTrack, ...prevTracks]); // Додаємо новий трек на початок списку
   };
 
   return (
@@ -199,26 +202,38 @@ const TracksPage: React.FC = () => {
           <ul className="track-list">
             {tracks.map((track) => (
               <li key={track.id} className="track-item">
-                <div className="track-info">
-                  {track.coverImage && isValidImageUrl(track.coverImage) ? (
-                    <img
-                      src={track.coverImage}
-                      alt={track.title}
-                      style={{
-                        width: '100px',
-                        height: '100px',
-                        objectFit: 'cover',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src="/gray-placeholder.png"
-                      alt="Placeholder"
-                      className="track-cover"
-                    />
-                  )}
+                {/* Інформація про трек */}
+                <div
+                  className="track-info"
+                  style={{ display: 'flex', gap: '10px' }}
+                >
+                  <div>
+                    {track.coverImage && isValidImageUrl(track.coverImage) ? (
+                      <img
+                        src={track.coverImage}
+                        alt={track.title}
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          objectFit: 'cover',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src="/gray-placeholder.png"
+                        alt="Placeholder"
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          objectFit: 'cover',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    )}
+                  </div>
 
                   <div>
                     <h3>{track.title}</h3>
@@ -227,7 +242,21 @@ const TracksPage: React.FC = () => {
                     {track.genres && <p>Genres: {track.genres.join(', ')}</p>}
                   </div>
                 </div>
-                <div className="track-buttons">
+
+                {track.audioFile && (
+                  <div className="track-audio">
+                    <audio controls preload="auto">
+                      <source
+                        src={`http://localhost:8000/${track.audioFile}`}
+                        type="audio/mpeg"
+                      />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                )}
+    
+                {/* Кнопки */}
+                <div className="track-buttons" style={{ marginTop: '10px' }}>
                   <input
                     type="checkbox"
                     checked={selectedTracks.has(track.id)}
@@ -237,6 +266,9 @@ const TracksPage: React.FC = () => {
                     Edit
                   </button>
                   <button onClick={() => deleteTrack(track.id)}>Delete</button>
+                  <button onClick={() => setUploadTrackId(track.id)}>
+                    Upload
+                  </button>
                 </div>
               </li>
             ))}
@@ -268,6 +300,23 @@ const TracksPage: React.FC = () => {
             onSuccess={handleCreateSuccess}
             genresList={genresList}
             onClose={() => setShowCreateModal(false)}
+          />
+        </Modal>
+      )}
+
+      {uploadTrackId && (
+        <Modal onClose={() => setUploadTrackId(null)}>
+          <UploadAudioForm
+            trackId={uploadTrackId}
+            onSuccess={(updatedTrack: Track) => {
+              setTracks((prevTracks) =>
+                prevTracks.map((track) =>
+                  track.id === updatedTrack.id ? updatedTrack : track
+                )
+              );
+              setUploadTrackId(null);
+            }}
+            onClose={() => setUploadTrackId(null)}
           />
         </Modal>
       )}
