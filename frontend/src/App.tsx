@@ -3,7 +3,7 @@ import React from "react";
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import GenresPage from "./pages/GenresPage";
 import TracksPage from "./pages/TracksPage";
-import EditTrackPage from "./pages/EditTrackPage";  // Додаємо імпорт для сторінки редагування
+import EditTrackPage from "./pages/EditTrackForm";  // Додаємо імпорт для сторінки редагування
 
 import './app.css';  // Відновлюємо імпорт стилів
 

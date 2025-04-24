@@ -5,6 +5,7 @@ import CreateTrackForm from '../components/CreateTrackForm';
 import Modal from '../components/Modal';
 import { isValidImageUrl } from '../utils/imageValidation';
 import UploadAudioForm from '../components/UploadAudioForm';
+import EditTrackForm from '../pages/EditTrackForm'; 
 
 export type Track = {
   id: string;
@@ -38,6 +39,8 @@ const TracksPage: React.FC = () => {
   const [selectedTracks, setSelectedTracks] = useState<Set<string>>(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [uploadTrackId, setUploadTrackId] = useState<string | null>(null);
+  const [editingTrackId, setEditingTrackId] = useState<string | null>(null);
+  
 
   // Дебаунс для пошуку
   useEffect(() => {
@@ -262,9 +265,23 @@ const TracksPage: React.FC = () => {
                     checked={selectedTracks.has(track.id)}
                     onChange={() => toggleSelectTrack(track.id)}
                   />
-                  <button onClick={() => alert('Edit modal coming soon!')}>
-                    Edit
-                  </button>
+                  <button onClick={() => setEditingTrackId(track.id)}>Edit</button>
+                  {editingTrackId && (
+  <Modal onClose={() => setEditingTrackId(null)}>
+    <EditTrackForm
+      trackId={editingTrackId}
+      genresList={genresList}
+      onSuccess={(updatedTrack) => {
+        setTracks((prevTracks) =>
+          prevTracks.map((t) => (t.id === updatedTrack.id ? updatedTrack : t))
+        );
+        setEditingTrackId(null);
+      }}
+      onClose={() => setEditingTrackId(null)}
+    />
+  </Modal>
+)}
+
                   <button onClick={() => deleteTrack(track.id)}>Delete</button>
                   <button onClick={() => setUploadTrackId(track.id)}>
                     Upload
